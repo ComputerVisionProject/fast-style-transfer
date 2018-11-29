@@ -75,7 +75,7 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
                     diff = np.sqrt(diff[:, :, 0]**2 + diff[:, :, 1]**2 + diff[:, :, 2]**2)
                     # print(diff.mean())
                     # input()
-                    diff = diff > 14
+                    diff = diff > diff.mean()
 
                     newStyledFrame[np.logical_not(diff)] = prevStyledFrame[np.logical_not(diff)]
 
@@ -86,7 +86,8 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
                     # input()
                     video_writer.write_frame(newStyledFrame)
 
-            return np.clip(_preds[i], 0, 255).astype(np.uint8)
+            # return np.clip(_preds[i], 0, 255).astype(np.uint8)
+            return newStyledFrame
         
         
         for frame in video_clip.iter_frames():
