@@ -58,8 +58,8 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
         frame_count = 0  # The frame count that written to X
         for frame in video_clip.iter_frames():
             X[frame_count, :, :, 0] = gaussian_filter(frame[:, :, 0], 1)
-            X[frame_count, :, :, 1] = gaussian_filter(frame[:, :, 0], 1)
-            X[frame_count, :, :, 2] = gaussian_filter(frame[:, :, 0], 1)
+            X[frame_count, :, :, 1] = gaussian_filter(frame[:, :, 1], 1)
+            X[frame_count, :, :, 2] = gaussian_filter(frame[:, :, 2], 1)
             
             frame_count += 1
             if frame_count == batch_size:
