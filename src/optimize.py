@@ -21,6 +21,22 @@ def optimize(content_targets, style_target, content_weight, style_weight,
         print("Train set has been trimmed slightly..")
         content_targets = content_targets[:-mod] 
 
+    
+    # noiseimg = np.zeros((3, image_size, image_size), dtype=xp.float32)
+    # noise_count = 1000
+    # noise_range = 30
+    # lambda_noise = 1000
+
+    # # prepare a noise image
+    # for ii in range(noise_count):
+    #     xx = random.randrange(image_size)
+    #     yy = random.randrange(image_size)
+
+    #     noiseimg[0][yy][xx] += random.randrange(-noise_range, noise_range)
+    #     noiseimg[1][yy][xx] += random.randrange(-noise_range, noise_range)
+    #     noiseimg[2][yy][xx] += random.randrange(-noise_range, noise_range)
+
+
     style_features = {}
 
     batch_shape = (batch_size,256,256,3)
@@ -84,6 +100,10 @@ def optimize(content_targets, style_target, content_weight, style_weight,
         y_tv = tf.nn.l2_loss(preds[:,1:,:,:] - preds[:,:batch_shape[1]-1,:,:])
         x_tv = tf.nn.l2_loss(preds[:,:,1:,:] - preds[:,:,:batch_shape[2]-1,:])
         tv_loss = tv_weight*2*(x_tv/tv_x_size + y_tv/tv_y_size)/batch_size
+
+
+        # noise loss
+        # pop_loss = lambda_noise * 
 
         loss = content_loss + style_loss + tv_loss
 
