@@ -14,6 +14,7 @@ import subprocess
 import numpy
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
+import cv2 as cv
 
 BATCH_SIZE = 4
 DEVICE = '/gpu:0'
@@ -70,19 +71,34 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
                     video_writer.write_frame(newStyledFrame)
                     
                 else:
+                    nxt = cv.cvtColor(curFrame,cv.COLOR_BGR2GRAY)
+                    prv = cv.cvtColor(prevFrame,cv.COLOR_BGR2GRAY)
+                    flow = cv.calcOpticalFlowFarneback(prv,nxt, None, 0.5, 3, 15, 3, 5, 1.2, 0)
+
+                    mag, ang = cv.cartToPolar(flow[...,0], flow[...,1])
+
+                    normalizedMag = np.array(cv.normalize(mag,None,0,255,cv.NORM_MINMAX))
+
+                    threshold = 0.1
+                    sigChange = normalizedMag > threshold
+
+                    newStyledFrame[np.logical_not(sigChange)] = prevStyledFrame[np.logical_not(sigChange)]
+
+                    
+
                     # print("other")
-                    diff = curFrame - prevFrame.astype(np.uint8)
-                    diff = np.sqrt(diff[:, :, 0]**2 + diff[:, :, 1]**2 + diff[:, :, 2]**2)
+                    #diff = curFrame - prevFrame.astype(np.uint8)
+                    #diff = np.sqrt(diff[:, :, 0]**2 + diff[:, :, 1]**2 + diff[:, :, 2]**2)
                     # print(diff.mean())
                     # input()
-                    diff = diff > diff.mean()
+                    #diff = diff > diff.mean()
 
-                    newStyledFrame[np.logical_not(diff)] = prevStyledFrame[np.logical_not(diff)]
+                    #newStyledFrame[np.logical_not(diff)] = prevStyledFrame[np.logical_not(diff)]
 
                     # print(newStyledFrame)
-                    newStyledFrame[:, :, 0] = gaussian_filter(newStyledFrame[:, :, 0], 1)
-                    newStyledFrame[:, :, 1] = gaussian_filter(newStyledFrame[:, :, 1], 1)
-                    newStyledFrame[:, :, 2] = gaussian_filter(newStyledFrame[:, :, 2], 1)
+                    #newStyledFrame[:, :, 0] = gaussian_filter(newStyledFrame[:, :, 0], 1)
+                    #newStyledFrame[:, :, 1] = gaussian_filter(newStyledFrame[:, :, 1], 1)
+                    #newStyledFrame[:, :, 2] = gaussian_filter(newStyledFrame[:, :, 2], 1)
                     # input()
                     video_writer.write_frame(newStyledFrame)
 
