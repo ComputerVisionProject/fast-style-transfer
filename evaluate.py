@@ -21,7 +21,7 @@ DEVICE = '/gpu:0'
 
 def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=4):
 
-    for s in np.arange(.5, 3.5, .5):
+    for s in np.arange(4, 5.5, .5):
         video_clip = VideoFileClip(path_in, audio=False)
         video_writer = ffmpeg_writer.FFMPEG_VideoWriter(path_out[:-4] + "_" + str(s) + ".mp4", video_clip.size, video_clip.fps, codec="libx264",
                                                         preset="medium", bitrate="2000k",
