@@ -4,6 +4,7 @@ sys.path.insert(0, 'src')
 import transform, numpy as np, vgg, pdb, os
 import scipy.misc
 import tensorflow as tf
+from scipy.ndimage.filters import gaussian_filter
 from utils import save_img, get_img, exists, list_files
 from argparse import ArgumentParser
 from collections import defaultdict
@@ -56,7 +57,10 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
 
         frame_count = 0  # The frame count that written to X
         for frame in video_clip.iter_frames():
-            X[frame_count] = frame
+            X[frame_count, :, :, 0] = gaussian_filter(frame[:, :, 0], 1)
+            X[frame_count, :, :, 1] = gaussian_filter(frame[:, :, 0], 1)
+            X[frame_count, :, :, 2] = gaussian_filter(frame[:, :, 0], 1)
+            
             frame_count += 1
             if frame_count == batch_size:
                 style_and_write(frame_count)
