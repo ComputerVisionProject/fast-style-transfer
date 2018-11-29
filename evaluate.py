@@ -80,9 +80,9 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
                     newStyledFrame[np.logical_not(diff)] = prevStyledFrame[np.logical_not(diff)]
 
                     # print(newStyledFrame)
-                    newStyledFrame[:, :, 0] = gaussian_filter(newStyledFrame[:, :, 0], 2)
-                    newStyledFrame[:, :, 1] = gaussian_filter(newStyledFrame[:, :, 1], 2)
-                    newStyledFrame[:, :, 2] = gaussian_filter(newStyledFrame[:, :, 2], 2)
+                    newStyledFrame[:, :, 0] = gaussian_filter(newStyledFrame[:, :, 0], 1)
+                    newStyledFrame[:, :, 1] = gaussian_filter(newStyledFrame[:, :, 1], 1)
+                    newStyledFrame[:, :, 2] = gaussian_filter(newStyledFrame[:, :, 2], 1)
                     # input()
                     video_writer.write_frame(newStyledFrame)
 
