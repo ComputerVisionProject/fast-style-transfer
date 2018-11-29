@@ -15,6 +15,7 @@ import numpy
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import moviepy.video.io.ffmpeg_writer as ffmpeg_writer
 import cv2 as cv
+import matplotlib.pyplot as plt
 
 BATCH_SIZE = 4
 DEVICE = '/gpu:0'
@@ -79,8 +80,12 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
 
                     normalizedMag = np.array(cv.normalize(mag,None,0,255,cv.NORM_MINMAX))
 
-                    threshold = 0.1
+                    threshold = 25
                     sigChange = normalizedMag > threshold
+
+                    # plt.imshow(sigChange)
+                    # plt.show()
+
 
                     newStyledFrame[np.logical_not(sigChange)] = prevStyledFrame[np.logical_not(sigChange)]
 
@@ -102,8 +107,8 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
                     # input()
                     video_writer.write_frame(newStyledFrame)
 
-            # return np.clip(_preds[i], 0, 255).astype(np.uint8)
-            return newStyledFrame
+            return np.clip(_preds[i], 0, 255).astype(np.uint8)
+            # return newStyledFrame
         
         
         for frame in video_clip.iter_frames():
