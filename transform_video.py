@@ -8,7 +8,7 @@ import pdb
 
 TMP_DIR = '.fns_frames_%s/' % random.randint(0,99999)
 DEVICE = '/gpu:0'
-BATCH_SIZE = 4
+BATCH_SIZE = 1
 
 def build_parser():
     parser = ArgumentParser()

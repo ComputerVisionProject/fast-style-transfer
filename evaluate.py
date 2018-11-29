@@ -5,6 +5,7 @@ import transform, numpy as np, vgg, pdb, os
 import scipy.misc
 import tensorflow as tf
 from utils import save_img, get_img, exists, list_files
+from scipy.ndimage.filters import gaussian_filter
 from argparse import ArgumentParser
 from collections import defaultdict
 import time
@@ -44,29 +45,69 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
                 raise Exception("No checkpoint found...")
         else:
             saver.restore(sess, checkpoint_dir)
-
+        
         X = np.zeros(batch_shape, dtype=np.float32)
+        frame_count = 0  # The frame count that written to X
+        curFrame = np.zeros(batch_shape[1:])
+        prevFrame = np.zeros(batch_shape[1:])
+        prevStyledFrame = np.zeros(batch_shape[1:])
 
-        def style_and_write(count):
+        def rgb2gray(rgb):
+
+            r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
+            gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
+
+            return gray
+
+        def style_and_write(count, prevStyledFrame, prevFrame, curFrame):
             for i in range(count, batch_size):
                 X[i] = X[count - 1]  # Use last frame to fill X
             _preds = sess.run(preds, feed_dict={img_placeholder: X})
             for i in range(0, count):
-                video_writer.write_frame(np.clip(_preds[i], 0, 255).astype(np.uint8))
+                newStyledFrame = np.clip(_preds[i], 0, 255).astype(np.uint8)
+                if not prevStyledFrame.any():
+                    # print("inital")
+                    video_writer.write_frame(newStyledFrame)
+                    
+                else:
+                    # print("other")
+                    diff = curFrame - prevFrame.astype(np.uint8)
+                    diff = np.sqrt(diff[:, :, 0]**2 + diff[:, :, 1]**2 + diff[:, :, 2]**2)
+                    # print(diff.mean())
+                    # input()
+                    diff = diff > 14
 
-        frame_count = 0  # The frame count that written to X
+                    newStyledFrame[np.logical_not(diff)] = prevStyledFrame[np.logical_not(diff)]
+
+                    # print(newStyledFrame)
+                    newStyledFrame[:, :, 0] = gaussian_filter(newStyledFrame[:, :, 0], 2)
+                    newStyledFrame[:, :, 1] = gaussian_filter(newStyledFrame[:, :, 1], 2)
+                    newStyledFrame[:, :, 2] = gaussian_filter(newStyledFrame[:, :, 2], 2)
+                    # input()
+                    video_writer.write_frame(newStyledFrame)
+
+            return np.clip(_preds[i], 0, 255).astype(np.uint8)
+        
+        
         for frame in video_clip.iter_frames():
-            X[frame_count] = frame
+            if not prevFrame.any() and not curFrame.any():
+                X[frame_count] = frame
+                curFrame = frame
+            else:
+                prevFrame = curFrame.copy()
+                curFrame = frame.copy()
+                X[frame_count] = curFrame.copy()
+            
             frame_count += 1
             if frame_count == batch_size:
-                style_and_write(frame_count)
+                
+                prevStyledFrame = style_and_write(frame_count, prevStyledFrame, prevFrame, curFrame)
                 frame_count = 0
 
         if frame_count != 0:
-            style_and_write(frame_count)
+            style_and_write(frame_count, prevStyledFrame, prevFrame, curFrame)
 
         video_writer.close()
-
 
 # get img_shape
 def ffwd(data_in, paths_out, checkpoint_dir, device_t='/gpu:0', batch_size=4):
