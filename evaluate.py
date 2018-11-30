@@ -21,7 +21,7 @@ DEVICE = '/gpu:0'
 
 def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=4):
 
-    for s in np.arange(4, 5.5, .5):
+    for s in np.arange(1, 3.5, .5):
         video_clip = VideoFileClip(path_in, audio=False)
         video_writer = ffmpeg_writer.FFMPEG_VideoWriter(path_out[:-4] + "_" + str(s) + ".mp4", video_clip.size, video_clip.fps, codec="libx264",
                                                         preset="medium", bitrate="2000k",
@@ -59,9 +59,8 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
 
             frame_count = 0  # The frame count that written to X
             for frame in video_clip.iter_frames():
-                X[frame_count, :, :, 0] = gaussian_filter(frame[:, :, 0], s)
-                X[frame_count, :, :, 1] = gaussian_filter(frame[:, :, 1], s)
-                X[frame_count, :, :, 2] = gaussian_filter(frame[:, :, 2], s)
+                X[frame_count] = gaussian_filter(frame, s)
+                
                 
                 frame_count += 1
                 if frame_count == batch_size:
