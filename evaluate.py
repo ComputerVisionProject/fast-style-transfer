@@ -93,11 +93,12 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
 
                     # Penalizing pixels with large optical flow by choosing the
                     # default style frame instead
-                    penalties = normalizedMag / np.max(normalizedMag)
+                    penalties = normalizedMag / np.max(normalizedMag) * 200
+                    penalties[penalties > 1] = 1
                     penalties = np.repeat(penalties[:,:,np.newaxis], 3, axis=2)
                     newStyledFrame = (newStyledFrame*(1-penalties) + defaultStyledFrame*(penalties)).astype(np.uint8)
 
-                    #newStyledFrame = (newStyledFrame*0.5 + defaultStyledFrame*0.5).astype(np.uint8) # Averaging images together
+                    #newStyledFrame = (newStyledFrame*0.3 + defaultStyledFrame*0.7).astype(np.uint8) # Averaging images together
 
                     # Treating all the dots as salt and pepper and Gaussian noise.
                     # Best filter to use seems to be a median filter
