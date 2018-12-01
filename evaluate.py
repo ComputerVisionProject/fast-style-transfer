@@ -93,7 +93,7 @@ def ffwd_video(path_in, path_out, checkpoint_dir, device_t='/gpu:0', batch_size=
 
                     # Penalizing pixels with large optical flow by choosing the
                     # default style frame instead
-                    penalties = normalizedMag / np.max(normalizedMag) * 200
+                    penalties = normalizedMag / np.max(normalizedMag) * 1000
                     penalties[penalties > 1] = 1
                     penalties = np.repeat(penalties[:,:,np.newaxis], 3, axis=2)
                     newStyledFrame = (newStyledFrame*(1-penalties) + defaultStyledFrame*(penalties)).astype(np.uint8)
